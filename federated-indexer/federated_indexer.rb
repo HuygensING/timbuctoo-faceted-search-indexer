@@ -16,7 +16,7 @@ class FederatedIndexer
   def initialize(options)
     @solr_io = SolrIO.new(options[:solr_url], :authorization => options[:solr_auth])
     @timbuctoo_io = TimbuctooIO.new(options[:timbuctoo_url])
-    @index_name = options.key?(:index_name) ? options[:index_name] : "federated"
+    @index_name = "aggregated"
     @forked = options[:forked]
     @debug_sample = options[:debug_sample]
   end
