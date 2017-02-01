@@ -1,5 +1,4 @@
 require 'net/http'
-require 'httplog'
 require 'json'
 
 def make_http(uri)
