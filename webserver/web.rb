@@ -52,7 +52,6 @@ post '/trigger' do
 end
 post '/trigger-multi-collection-search' do
   begin
-    payload = JSON.parse(request.body.read)
     FederatedIndexer.new(
         :timbuctoo_url => ENV['TIMBUCTOO_SCRAPE_URL'],
         :solr_url => ENV['SOLR_URL']
