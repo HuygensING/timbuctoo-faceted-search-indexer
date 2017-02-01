@@ -36,3 +36,6 @@ $ gem install bundler # (may require root permissions)
 $ bundle install # (may require root permissions)   
 ```
 
+## Client app
+
+A javascript app that can trigger this indexer and read from the solr server is developed at https://github.com/HuygensING/timbuctoo-gui/tree/master/timbuctoo-generic-search-client
