@@ -1,5 +1,5 @@
 require 'open-uri'
-require '../lib/timbuctoo_solr/solr_io'
+require_relative '../lib/timbuctoo_solr/solr_io'
 
 # Initialize for local solr
 solr_io = SolrIO.new('http://localhost:8983/solr')

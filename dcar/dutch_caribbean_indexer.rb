@@ -1,10 +1,10 @@
-require '../lib/timbuctoo_solr/timbuctoo_io'
-require '../lib/timbuctoo_solr/solr_io'
+require_relative '../lib/timbuctoo_solr/timbuctoo_io'
+require_relative '../lib/timbuctoo_solr/solr_io'
 
-require './configs/dcar_archive_config'
-require './configs/dcar_archiver_config'
-require './configs/dcar_legislation_config'
-require './dcar_mapper'
+require_relative './configs/dcar_archive_config'
+require_relative './configs/dcar_archiver_config'
+require_relative './configs/dcar_legislation_config'
+require_relative './dcar_mapper'
 
 class DutchCaribbeanIndexer
   def initialize(options)

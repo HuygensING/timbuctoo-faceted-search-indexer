@@ -1,4 +1,4 @@
-require '../lib/timbuctoo_solr/timbuctoo_io'
+require_relative '../lib/timbuctoo_solr/timbuctoo_io'
 
 # basic scrape
 # timbuctoo_io = TimbuctooIO.new('http://test.repository.huygens.knaw.nl')

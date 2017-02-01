@@ -1,5 +1,5 @@
 require 'optparse'
-require './women_writers_indexer'
+require_relative './women_writers_indexer'
 
 options = {}
 

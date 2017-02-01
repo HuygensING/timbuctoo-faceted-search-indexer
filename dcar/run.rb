@@ -1,5 +1,5 @@
 require 'optparse'
-require './dutch_caribbean_indexer'
+require_relative './dutch_caribbean_indexer'
 
 options = {}
 

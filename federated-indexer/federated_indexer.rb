@@ -1,14 +1,14 @@
 require 'json'
 require 'pp'
-require '../lib/mixins/converters/to_year_converter'
-require '../lib/mixins/converters/to_names_converter'
-require '../lib/timbuctoo_solr/default_mapper'
-require '../lib/timbuctoo_solr/timbuctoo_io'
-require '../lib/timbuctoo_solr/solr_io'
+require_relative '../lib/mixins/converters/to_year_converter'
+require_relative '../lib/mixins/converters/to_names_converter'
+require_relative '../lib/timbuctoo_solr/default_mapper'
+require_relative '../lib/timbuctoo_solr/timbuctoo_io'
+require_relative '../lib/timbuctoo_solr/solr_io'
 
-require './archetype_config.rb'
-require './federated_mapper.rb'
-require './solr_updater.rb'
+require_relative './archetype_config.rb'
+require_relative './federated_mapper.rb'
+require_relative './solr_updater.rb'
 
 
 class FederatedIndexer

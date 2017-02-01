@@ -1,5 +1,5 @@
 require 'optparse'
-require './federated_indexer'
+require_relative './federated_indexer'
 
 options = {
   :forked => false,

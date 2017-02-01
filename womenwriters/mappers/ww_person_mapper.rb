@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/../../lib/timbuctoo_solr/default_mapper'
-require File.dirname(__FILE__) + '/../../lib/mixins/converters/to_year_converter'
-require File.dirname(__FILE__) + '/../../lib/mixins/converters/to_names_converter'
+require_relative '../../lib/timbuctoo_solr/default_mapper'
+require_relative '../../lib/mixins/converters/to_year_converter'
+require_relative '../../lib/mixins/converters/to_names_converter'
 
 class WwPersonMapper < DefaultMapper
   include ToYearConverter

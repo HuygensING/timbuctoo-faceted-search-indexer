@@ -1,14 +1,14 @@
-require '../lib/timbuctoo_solr/timbuctoo_io'
-require '../lib/timbuctoo_solr/solr_io'
-require '../lib/timbuctoo_solr/default_mapper'
+require_relative '../lib/timbuctoo_solr/timbuctoo_io'
+require_relative '../lib/timbuctoo_solr/solr_io'
+require_relative '../lib/timbuctoo_solr/default_mapper'
 
-require './configs/ww_collective_config'
-require './configs/ww_person_config'
-require './configs/ww_document_config'
-require './mappers/ww_person_mapper'
-require './mappers/ww_document_mapper'
-require './mappers/ww_person_reception_mapper'
-require './mappers/ww_document_reception_mapper'
+require_relative './configs/ww_collective_config'
+require_relative './configs/ww_person_config'
+require_relative './configs/ww_document_config'
+require_relative './mappers/ww_person_mapper'
+require_relative './mappers/ww_document_mapper'
+require_relative './mappers/ww_person_reception_mapper'
+require_relative './mappers/ww_document_reception_mapper'
 
 class WomenWritersIndexer
   def initialize(options)

@@ -1,5 +1,5 @@
 require 'json'
-require '../lib/timbuctoo_solr/timbuctoo_io'
+require_relative '../lib/timbuctoo_solr/timbuctoo_io'
 
 timbuctoo_io = TimbuctooIO.new('http://test.repository.huygens.knaw.nl')
 
