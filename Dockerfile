@@ -3,7 +3,7 @@ FROM ruby:2.2
 EXPOSE 80
 
 ENV TIMBUCTOO_SCRAPE_URL http://timbuctoo
-ENV SOLR_URL http://solr
+ENV SOLR_URL http://solr/solr
 
 RUN mkdir -p /app
 COPY dcar /app/dcar
