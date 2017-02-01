@@ -1,7 +1,17 @@
 module ToNamesConverter
 
   def convert_to_names (names)
-    names.map{|name| name['components'].map{|component| component['value']}.join(" ")}.join(" ")
+    if (names)
+      names.map{|name| 
+        if name
+          name['components'].map{|component| 
+            if component
+              component['value']
+            end
+          }.join(" ")
+        end
+      }.join(" ")
+    end
   end
 
   def convert_to_name_sort (names)
