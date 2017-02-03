@@ -32,22 +32,48 @@ class GenericIndexer
   end
 
   def run
+    start_time = Time.new
     indexer_failed = false
     commited_indexes = []
+    begin
+	@solr_io.create("monitor")
+    rescue
+	# monitor exists
+    end
     @mappers.each do |collection, mapper|
       begin
         @solr_io.create(collection)
       rescue Exception => e
-        puts "Index #{collection} already exists"
+        STDERR.puts e
+        STDERR.puts "Index #{collection} already exists"
       end
       @solr_io.delete_data(collection)
       begin
-      @timbuctoo_io.scrape_collection(collection, :with_relations => true, :process_record => -> (record) {
-        convert(mapper, record, collection)
-      })
+        count_records = 0
+        @timbuctoo_io.scrape_collection(collection, :with_relations => true, :process_record => -> (record) {
+          convert(mapper, record, collection)
+          count_records += 1
+          if (Time.new - start_time) > 1
+            STDERR.puts "#{collection}: #{count_records} converted"
+            @solr_io.update("monitor",
+              [{"id"=>"#{collection}",
+                "progress"=>"#{count_records} converted"}])
+            @solr_io.commit("monitor")
+            start_time = Time.new
+          end
+        })
 
-      commited_indexes << collection
-      @solr_io.commit(collection)
+        @solr_io.update("monitor",
+              [{"id"=>"#{collection}",
+                "progress"=>"#{count_records} converted"}])
+        @solr_io.commit("monitor")
+        commited_indexes << collection
+        @solr_io.commit(collection)
+        STDERR.puts "#{collection}: #{count_records} indexed"
+        @solr_io.update("monitor",
+              [{"id"=>"#{collection}",
+                "progress"=>"#{count_records} indexed"}])
+        @solr_io.commit("monitor")
       rescue Exception => e
         STDERR.puts "indexer failed"
         STDERR.puts e
