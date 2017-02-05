@@ -1,15 +1,9 @@
 require 'net/http'
 require 'json'
-
-def make_http(uri)
-  http = Net::HTTP.new(uri.hostname, uri.port)
-  http.use_ssl = uri.scheme.eql?('https')
-
-  http
-end
+require_relative './http_client'
 
 class Dataset
-
+  include HttpClient
   attr_reader :metadata, :name, :is_published
 
   def initialize(name: nil, metadata: nil, label: nil, vreMetadata: nil, isPublished: nil)
@@ -20,18 +14,16 @@ class Dataset
 
   private
   def fetch_metadata(metadata_url)
-    location = "#{metadata_url}?withCollectionInfo=true"
-    uri = URI.parse(location)
-    req = Net::HTTP::Get.new(uri)
-    http = make_http(uri)
+    uri = URI.new(metadata_url)
+    uri.query = URI.encode_www_form(["withCollectionInfo", "true"] + URI.decode_www_form(uri.query))
+    response = send_http(HTTP::Get.new(uri), true, ['200'])
 
-    response = http.request(req)
-    raise "http request to #{location} failed with status #{response.code}: #{location}" unless response.code.eql?('200')
     JSON.parse(response.body, :symbolize_names => true)
   end
 end
 
 class TimbuctooIO
+  include HttpClient
 
   # @param [String] base_url the timbuctoo server base url
   # @params [Boolean] dump_files flag for dumping files
@@ -41,7 +33,6 @@ class TimbuctooIO
     @dump_files = dump_files
     @dump_dir = dump_dir || './'
   end
-
 
   # Scrapes an entire Timbuctoo collection
   # @param [String] collection_name the name of the timbuctoo collection
@@ -75,13 +66,7 @@ class TimbuctooIO
   end
 
   def fetch_datasets
-    location = "#{@base_url}/v2.1/system/vres"
-    uri = URI.parse(location)
-    req = Net::HTTP::Get.new(uri)
-    http = make_http(uri)
-
-    response = http.request(req)
-    raise "http request to #{location} failed with status #{response.code}: #{location}" unless response.code.eql?('200')
+    response = send_http(Net::HTTP::Get.new(make_uri("/v2.1/system/vres")), true, ['200'])
 
     JSON.parse(response.body, :symbolize_names => true)
         .map{|dataset_data| Dataset.new(dataset_data)}
@@ -97,16 +82,11 @@ class TimbuctooIO
   end
 
   def get_http_batch(batch_size, collection_name, start_value, with_relations)
-    location = "#{@base_url}/v2.1/domain/#{collection_name}" +
-        "?rows=#{batch_size}" +
-        "&start=#{start_value}" +
-        (with_relations ? '&withRelations=true' : '')
-    uri = URI.parse(location)
-    req = Net::HTTP::Get.new(uri)
-    http = make_http(uri)
-    http.read_timeout = 600
-    response = http.request(req)
-    raise "http request failed with status #{response.code}: #{location}" unless response.code.eql?('200')
+    response = send_http(Net::HTTP::Get.new(make_uri("/v2.1/domain/#{collection_name}", [
+      ["rows", batch_size],
+      ["start", start_value]
+    ] + (with_relations ? ["withRelations", "true"] : []))), true, ['200'])
+
     response.body
   end
 

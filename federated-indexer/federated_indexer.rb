@@ -63,11 +63,7 @@ class FederatedIndexer
 
   private
   def initialize_index
-    begin
-      @solr_io.create(@index_name)
-    rescue Exception => e
-      puts "Index #{@index_name} already exists"
-    end
+    @solr_io.create(@index_name)
 
     @solr_io.delete_data(@index_name)
   end

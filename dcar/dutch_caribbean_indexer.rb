@@ -59,10 +59,6 @@ class DutchCaribbeanIndexer
 
   def create_index collection
     puts "CREATE #{collection}"
-    begin
-      @solr_io.create(collection)
-    rescue Exception => e
-      puts "Index #{collection} already exists"
-    end
+    @solr_io.create(collection)
   end
 end

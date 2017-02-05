@@ -35,18 +35,9 @@ class GenericIndexer
     start_time = Time.new
     indexer_failed = false
     commited_indexes = []
-    begin
-	@solr_io.create("monitor")
-    rescue
-	# monitor exists
-    end
+    @solr_io.create("monitor")
     @mappers.each do |collection, mapper|
-      begin
-        @solr_io.create(collection)
-      rescue Exception => e
-        STDERR.puts e
-        STDERR.puts "Index #{collection} already exists"
-      end
+      @solr_io.create(collection)
       @solr_io.delete_data(collection)
       begin
         count_records = 0
@@ -54,7 +45,7 @@ class GenericIndexer
           convert(mapper, record, collection)
           count_records += 1
           if (Time.new - start_time) > 1
-            STDERR.puts "#{collection}: #{count_records} converted"
+            puts "#{collection}: #{count_records} converted"
             @solr_io.update("monitor",
               [{"id"=>"#{collection}",
                 "progress"=>"#{count_records} converted"}])
@@ -75,8 +66,9 @@ class GenericIndexer
                 "progress"=>"#{count_records} indexed"}])
         @solr_io.commit("monitor")
       rescue Exception => e
-        STDERR.puts "indexer failed"
-        STDERR.puts e
+        STDERR.puts "indexer failed (see stack trace below)"
+        STDERR.puts "Error during processing: #{$!}"
+        STDERR.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
         indexer_failed = true
         break
       end

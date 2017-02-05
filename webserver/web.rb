@@ -1,7 +1,7 @@
 require 'sinatra'
 require 'sinatra/base'
 require 'sinatra/cross_origin'
-require 'httplog'
+# require 'httplog'
 
 require_relative '../generic-indexer/generic_indexer'
 require_relative '../federated-indexer/federated_indexer'
