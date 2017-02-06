@@ -3,10 +3,10 @@ require 'json'
 require_relative './http_client'
 
 class Dataset
-  include HttpClient
   attr_reader :metadata, :name, :is_published
 
   def initialize(name: nil, metadata: nil, label: nil, vreMetadata: nil, isPublished: nil)
+    @client = HttpClient.new("http://example.com", nil)
     @name = name
     @metadata = fetch_metadata(metadata) if isPublished
     @is_published = isPublished
@@ -16,20 +16,18 @@ class Dataset
   def fetch_metadata(metadata_url)
     uri = URI.new(metadata_url)
     uri.query = URI.encode_www_form(["withCollectionInfo", "true"] + URI.decode_www_form(uri.query))
-    response = send_http(HTTP::Get.new(uri), true, ['200'])
+    response = @client.send_http(HTTP::Get.new(uri), true, ['200'])
 
     JSON.parse(response.body, :symbolize_names => true)
   end
 end
 
 class TimbuctooIO
-  include HttpClient
-
   # @param [String] base_url the timbuctoo server base url
   # @params [Boolean] dump_files flag for dumping files
   # @params [String] dump_dir the directory to dump the files in
   def initialize (base_url, dump_files: false, dump_dir: './')
-    @base_url = base_url
+    @client = HttpClient.new(base_url, nil)
     @dump_files = dump_files
     @dump_dir = dump_dir || './'
   end
@@ -66,7 +64,7 @@ class TimbuctooIO
   end
 
   def fetch_datasets
-    response = send_http(Net::HTTP::Get.new(make_uri("/v2.1/system/vres")), true, ['200'])
+    response = @client.send_http(Net::HTTP::Get.new(@client.make_uri("/v2.1/system/vres")), true, ['200'])
 
     JSON.parse(response.body, :symbolize_names => true)
         .map{|dataset_data| Dataset.new(dataset_data)}
@@ -82,7 +80,7 @@ class TimbuctooIO
   end
 
   def get_http_batch(batch_size, collection_name, start_value, with_relations)
-    response = send_http(Net::HTTP::Get.new(make_uri("/v2.1/domain/#{collection_name}", [
+    response = @client.send_http(Net::HTTP::Get.new(@client.make_uri("/v2.1/domain/#{collection_name}", [
       ["rows", batch_size],
       ["start", start_value]
     ] + (with_relations ? ["withRelations", "true"] : []))), true, ['200'])
