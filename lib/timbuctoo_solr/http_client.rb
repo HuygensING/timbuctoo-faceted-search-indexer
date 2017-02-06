@@ -1,4 +1,12 @@
-module HttpClient
+include Net
+
+class HttpClient
+
+  def initialize(base_url, authorization: nil)
+    @base_url = base_url
+    @authorization = authorization
+  end
+
   def make_uri(path, query = nil)
     base_url = @base_url
     if !@base_url.end_with?("/")
