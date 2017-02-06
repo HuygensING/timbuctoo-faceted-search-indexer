@@ -35,7 +35,7 @@ class GenericIndexer
 
   def run
     start_time = Time.new
-    indexer_failed = false
+    indexer_succeeded = false
     commited_indexes = []
     @import_status.start_import(@mappers.keys)
     @mappers.each do |collection, mapper|
@@ -57,20 +57,21 @@ class GenericIndexer
         @solr_io.commit(collection)
         STDERR.puts "#{collection}: #{count_records} indexed"
         @import_status.update_progress(collection, count_records, true)
+        indexer_succeeded = true
       rescue Exception => e
         STDERR.puts "indexer failed (see stack trace below)"
         STDERR.puts "Error during processing: #{$!}"
         STDERR.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
-        indexer_failed = true
+        indexer_succeeded = false
         break
       end
     end
-    if indexer_failed
+    if !indexer_succeeded
       commited_indexes.each do |collection|
         @solr_io.delete_index(collection)
       end
     end
-    @import_status.finish_import(indexer_failed)
+    @import_status.finish_import(indexer_succeeded)
   end
 
   def convert(mapper, record, collection)
