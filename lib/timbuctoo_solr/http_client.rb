@@ -1,8 +1,24 @@
+require 'net/http'
 include Net
+
+class ResponseError < StandardError
+  attr_reader :response, :expected_responses, :body
+
+  def initialize(response, expected_responses, body, msg="Unexpected response code")
+    @msg = msg
+    @response = response
+    @expected_responses = expected_responses
+    @body = body
+    super(msg)
+  end
+end
+
+class RequestError < StandardError
+end
 
 class HttpClient
 
-  def initialize(base_url, authorization: nil)
+  def initialize(base_url, authorization = nil)
     @base_url = base_url
     @authorization = authorization
   end
@@ -33,7 +49,7 @@ class HttpClient
       http.read_timeout = 600 #seconds, so this is 10 minutes
       http.use_ssl = req.uri.scheme.eql?("https")
       response = http.request(req)
-    rescue Exception => e
+    rescue StandardError => e
       STDERR.puts "#{description} failed with #{e}"
       STDERR.puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
       if do_retry && retries <= max_retries
@@ -44,11 +60,11 @@ class HttpClient
         sleep sleeptime
         retry
       else
-        raise "Giving up after #{retries} retries."
+        raise RequestError, "Giving up after #{retries} retries."
       end
     end
     if !successCodes.include?(response.code)
-      raise "#{description} failed with status #{response.code}\n\n#{response.body}"
+      raise ResponseError.new(response.code, successCodes, response.body, "#{description} failed with status #{response.code}\n\n#{response.body}")
     end
     response
   end

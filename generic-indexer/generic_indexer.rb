@@ -3,6 +3,7 @@ require_relative '../lib/mixins/converters/to_names_converter'
 require_relative '../lib/timbuctoo_solr/default_mapper'
 require_relative '../lib/timbuctoo_solr/timbuctoo_io'
 require_relative '../lib/timbuctoo_solr/solr_io'
+require_relative '../lib/timbuctoo_solr/import_status'
 require_relative './generic_configs'
 
 class GenericMapper < DefaultMapper
@@ -24,6 +25,7 @@ class GenericIndexer
   def initialize(options)
     @mappers = {}
     @solr_io = SolrIO.new(options[:solr_url], :authorization => options[:solr_auth])
+    @import_status = ImportStatus.new(options[:solr_url], "monitor", options[:vre_id], :authorization => options[:solr_auth])
     GenericConfigs.new(:vre_id => options[:vre_id], :timbuctoo_url => options[:timbuctoo_url]).fetch.each do |config|
       @mappers[config[:collection]] = GenericMapper.new(:properties => config[:properties], :relations => config[:relations])
     end
@@ -35,7 +37,7 @@ class GenericIndexer
     start_time = Time.new
     indexer_failed = false
     commited_indexes = []
-    @solr_io.create("monitor")
+    @import_status.start_import(@mappers.keys)
     @mappers.each do |collection, mapper|
       @solr_io.create(collection)
       @solr_io.delete_data(collection)
@@ -46,25 +48,15 @@ class GenericIndexer
           count_records += 1
           if (Time.new - start_time) > 1
             puts "#{collection}: #{count_records} converted"
-            @solr_io.update("monitor",
-              [{"id"=>"#{collection}",
-                "progress"=>"#{count_records} converted"}])
-            @solr_io.commit("monitor")
+            @import_status.update_progress(collection, count_records)
             start_time = Time.new
           end
         })
 
-        @solr_io.update("monitor",
-              [{"id"=>"#{collection}",
-                "progress"=>"#{count_records} converted"}])
-        @solr_io.commit("monitor")
         commited_indexes << collection
         @solr_io.commit(collection)
         STDERR.puts "#{collection}: #{count_records} indexed"
-        @solr_io.update("monitor",
-              [{"id"=>"#{collection}",
-                "progress"=>"#{count_records} indexed"}])
-        @solr_io.commit("monitor")
+        @import_status.update_progress(collection, count_records, true)
       rescue Exception => e
         STDERR.puts "indexer failed (see stack trace below)"
         STDERR.puts "Error during processing: #{$!}"
@@ -78,6 +70,7 @@ class GenericIndexer
         @solr_io.delete_index(collection)
       end
     end
+    @import_status.finish_import(indexer_failed)
   end
 
   def convert(mapper, record, collection)

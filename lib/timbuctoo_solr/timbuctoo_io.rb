@@ -3,7 +3,6 @@ require 'json'
 require_relative './http_client'
 
 class Dataset
-  include HttpClient
   attr_reader :metadata, :name, :is_published
 
   def initialize(name: nil, metadata: nil, label: nil, vreMetadata: nil, isPublished: nil)
@@ -28,7 +27,7 @@ class TimbuctooIO
   # @params [Boolean] dump_files flag for dumping files
   # @params [String] dump_dir the directory to dump the files in
   def initialize (base_url, dump_files: false, dump_dir: './')
-    @client = HttpClient.new(base_url, authorization)
+    @client = HttpClient.new(base_url, nil)
     @dump_files = dump_files
     @dump_dir = dump_dir || './'
   end

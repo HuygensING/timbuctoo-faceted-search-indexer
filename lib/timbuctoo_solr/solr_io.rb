@@ -4,7 +4,7 @@ require_relative './http_client'
 class SolrIO
   # @param [String] base_url the solr base_url (usually including /solr)
   # @param [String] authorization the authorization header
-  def initialize(base_url, authorization: nil)
+  def initialize(base_url, authorization = nil)
     @client = HttpClient.new(base_url, authorization)
   end
 
@@ -58,9 +58,10 @@ class SolrIO
   def delete_index(index_name)
     uri = @client.make_uri('/admin/cores', [
       ["action", "UNLOAD"],
-      ["core", index_name]
+      ["core", index_name],
+      ["deleteInstanceDir", "true"]
     ])
-    response = @client.send_http(req, true, ['200'])
+    response = @client.send_http(HTTP::Post.new(uri), true, ['200'])
   end
 
 end
