@@ -76,11 +76,29 @@ class ImportStatus
   #sets the progress for the indices in this vre
   def get_progress()
     doc = get_vre_status()
-    result = {}
-    doc.each {|key, value| 
-      result[key["collection_count_".length..-1]] = value if key.start_with("collection_count_") 
-      result[key["collection_finished_".length..-1]] = value if key.start_with("collection_finished_") 
+    result = {
+      "updating" => false,
+      "ready" => false
     }
+    if doc
+      doc.each {|key, value|
+        if key.to_s().start_with?("collection_count_")
+          outputkey = key["collection_count_".length..-1]
+          subkey = "count"
+        elsif key.to_s().start_with?("collection_finished_")
+          outputkey = key["collection_finished_".length..-1]
+          subkey = "finished"
+        end
+        if outputkey
+          if !result.key?(outputkey)
+            result[outputkey] = {}
+          end
+          result[outputkey][subkey] = value[0] if value
+        end
+      }
+      result["updating"] = !!doc[:updating]
+      result["ready"] = !!doc[:ready]
+    end
     result
   end
 

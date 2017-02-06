@@ -47,7 +47,7 @@ class GenericIndexer
           convert(mapper, record, collection)
           count_records += 1
           if (Time.new - start_time) > 1
-            puts "#{collection}: #{count_records} converted"
+            STDERR.puts "#{collection}: #{count_records} converted"
             @import_status.update_progress(collection, count_records)
             start_time = Time.new
           end
