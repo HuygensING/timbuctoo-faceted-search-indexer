@@ -57,6 +57,10 @@ options "/status/:datasetName" do
   status 204
   ""
 end
+get '/started' do
+  status 200
+  "Started!"
+end
 get '/status/:datasetName' do
   cross_origin
   begin
