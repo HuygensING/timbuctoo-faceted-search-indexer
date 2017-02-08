@@ -40,7 +40,7 @@ direct relations:
 2. http://test.repository.huygens.knaw.nl/v2.1/domain/dcararchives?rows=10&withRelations=true[Sample with relations]
 
 ==== Basic scrape
-This script above scrapes the collection 'dcararchives' from the Timbuctoo test repository:
+This script below scrapes the collection 'dcararchives' from the Timbuctoo test repository:
 
 [source,ruby]
 --
