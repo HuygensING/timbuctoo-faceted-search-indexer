@@ -9,6 +9,7 @@ require_relative './mappers/ww_person_mapper'
 require_relative './mappers/ww_document_mapper'
 require_relative './mappers/ww_person_reception_mapper'
 require_relative './mappers/ww_document_reception_mapper'
+require_relative '../lib/timbuctoo_solr/import_status'
 
 class WomenWritersIndexer
   def initialize(options)
@@ -27,28 +28,45 @@ class WomenWritersIndexer
     })
 
     @solr_io = SolrIO.new(options[:solr_url], {:authorization => options[:solr_auth]})
+    @import_status = ImportStatus.new(options[:solr_url], "monitor", "WomenWriters", :authorization => options[:solr_auth])
 
   end
 
   def run
-    # Scrape persons and documents from Timbuctoo
-    scrape_persons
-    scrape_documents
+    indexer_succeeded = false
+    begin
+      @import_status.start_import("wwcollectives", "wwpersons", "wwdocuments", "wwpersonreceptions", "wwdocumentreceptions")
+      # Scrape persons and documents from Timbuctoo
+      scrape_persons
+      scrape_documents
 
-    # Always run person_mapper.add_languages before @document_mapper.add_creators to ensure correct _childDocuments_
-    # filters on wwdocuments index and wwdocumentreceptions index!!
-    @person_mapper.add_languages(@document_mapper)
-    @document_mapper.add_creators(@person_mapper)
+      # Always run person_mapper.add_languages before @document_mapper.add_creators to ensure correct _childDocuments_
+      # filters on wwdocuments index and wwdocumentreceptions index!!
+      @person_mapper.add_languages(@document_mapper)
+      @document_mapper.add_creators(@person_mapper)
 
 
-    puts "Found #{@document_mapper.person_receptions.length} person receptions"
-    puts "Found #{@document_mapper.document_receptions.length} document receptions"
+      puts "Found #{@document_mapper.person_receptions.length} person receptions"
+      puts "Found #{@document_mapper.document_receptions.length} document receptions"
 
-    reindex_collectives
-    reindex_persons
-    reindex_documents
-    reindex_person_receptions
-    reindex_document_receptions
+      @solr_io.update("wwcollectives", 0)
+      reindex_collectives
+      @solr_io.update("wwcollectives", 1, true)
+      @solr_io.update("wwpersons", 0)
+      reindex_persons
+      @solr_io.update("wwpersons", 1, true)
+      @solr_io.update("wwdocuments", 0)
+      reindex_documents
+      @solr_io.update("wwdocuments", 1, true)
+      @solr_io.update("wwpersonreceptions", 0)
+      reindex_person_receptions
+      @solr_io.update("wwpersonreceptions", 1, true)
+      @solr_io.update("wwdocumentreceptions", 0)
+      reindex_document_receptions
+      @solr_io.update("wwdocumentreceptions", 1, true)
+    ensure
+      @import_status.finish_import(indexer_succeeded)
+    end
   end
 
   private

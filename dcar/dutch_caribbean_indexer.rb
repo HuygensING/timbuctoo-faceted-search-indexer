@@ -5,6 +5,7 @@ require_relative './configs/dcar_archive_config'
 require_relative './configs/dcar_archiver_config'
 require_relative './configs/dcar_legislation_config'
 require_relative './dcar_mapper'
+require_relative '../lib/timbuctoo_solr/import_status'
 
 class DutchCaribbeanIndexer
   def initialize(options)
@@ -22,13 +23,20 @@ class DutchCaribbeanIndexer
     })
 
     @solr_io = SolrIO.new(options[:solr_url], {:authorization => options[:solr_auth]})
-
+    @import_status = ImportStatus.new(options[:solr_url], "monitor", "DutchCaribbean", :authorization => options[:solr_auth])
   end
 
   def run
-    reindex("dcararchives")
-    reindex("dcararchivers")
-    reindex("dcarlegislations")
+    indexer_succeeded = false
+    begin
+      @import_status.start_import(["dcararchives", "dcararchivers", "dcarlegislations"])
+      reindex("dcararchives")
+      reindex("dcararchivers")
+      reindex("dcarlegislations")
+      indexer_succeeded = true
+    ensure
+      @import_status.finish_import(indexer_succeeded)
+    end
   end
 
   private
@@ -40,11 +48,14 @@ class DutchCaribbeanIndexer
     puts "UPDATE #{collection_name}"
     batch = []
     batch_size = 1000
+    count_records = 0
     @timbuctoo_io.scrape_collection(collection_name, {
         :process_record => -> (record) {
           batch << @mappers[collection_name.to_sym].convert(record)
+          count_records = count_records + 1
           if batch.length >= batch_size
             @solr_io.update(collection_name, batch)
+            @import_status.update_progress(collection_name, count_records)
             batch = []
           end
         },
@@ -55,6 +66,7 @@ class DutchCaribbeanIndexer
     @solr_io.update(collection_name, batch)
     puts "COMMIT #{collection_name}"
     @solr_io.commit(collection_name)
+    @import_status.update_progress(collection_name, count_records, true)
   end
 
   def create_index collection

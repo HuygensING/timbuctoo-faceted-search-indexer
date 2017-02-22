@@ -29,7 +29,7 @@ post '/trigger' do
         status 200
         return
       elsif payload["datasetName"] == "WomenWriters"
-        DutchCaribbeanIndexer.new(
+        WomenWritersIndexer.new(
           :timbuctoo_url => ENV['TIMBUCTOO_SCRAPE_URL'],
           :solr_url => ENV['SOLR_URL']
         ).run
