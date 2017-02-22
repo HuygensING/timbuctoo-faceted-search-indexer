@@ -1,0 +1,35 @@
+version: '2'
+
+services:
+  timbuctoo:
+    image: huygensing/timbuctoo
+    environment:
+      BASE_URI: http://localhost:8080
+      TIMBUCTOO_GUI_PUBLIC_URL: http://localhost:8082
+      TIMBUCTOO_SEARCH_URL: http://indexer/trigger
+    ports:
+      - "8080:80"
+  solr:
+    image: solr:6.4.1
+    #command override to enable CORS
+    command: bash -c "sed -i 's|</web-app>|<filter> <filter-name>cross-origin</filter-name> <filter-class>org.eclipse.jetty.servlets.CrossOriginFilter</filter-class> <init-param> <param-name>chainPreflight</param-name> <param-value>false</param-value> </init-param> </filter> <filter-mapping> <filter-name>cross-origin</filter-name> <url-pattern>/*</url-pattern> </filter-mapping></web-app>|' /opt/solr/server/etc/webdefault.xml && exec solr-foreground"
+    ports:
+      - "8081:8983"
+  indexer:
+    image: huygensing/timbuctoo-faceted-search-indexer
+    build: .
+    environment:
+      - TIMBUCTOO_SCRAPE_URL=http://timbuctoo
+      - SOLR_URL=http://solr:8983/solr
+    ports:
+      - "8083:80"
+  timbuctoo-gui:
+    image: huygensing/timbuctoo-gui
+    environment:
+      - TIMBUCTOO_URL=http://localhost:8080
+      - SOLR_QUERY_URL=http://localhost:8081/solr
+      - OWN_HOST_URL=http://localhost:8082
+      - INDEXER_URL=http://localhost:8083
+      - PREFIXPATH=/
+    ports:
+      - "8082:80"
