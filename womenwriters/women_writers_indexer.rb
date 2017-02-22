@@ -35,7 +35,7 @@ class WomenWritersIndexer
   def run
     indexer_succeeded = false
     begin
-      @import_status.start_import("wwcollectives", "wwpersons", "wwdocuments", "wwpersonreceptions", "wwdocumentreceptions")
+      @import_status.start_import(["wwcollectives", "wwpersons", "wwdocuments", "wwpersonreceptions", "wwdocumentreceptions"])
       # Scrape persons and documents from Timbuctoo
       scrape_persons
       scrape_documents
