@@ -12,15 +12,18 @@ class SolrIO
   # @param [String] index_name name of the index
   # @param [String] config_set the config set used
   def create(index_name, config_set: 'data_driven_schema_configs')
-    uri = @client.make_uri('/admin/cores', [
-      ["action", "CREATE"],
-      ["name", index_name],
-      ["instanceDir", index_name],
-      ["configSet", config_set]
-    ])
-    response = @client.send_http(HTTP::Post.new(uri), true, ['200', '500'])
-    if response.code.eql?('500') && !response.body.include?("Core with name '#{index_name}' already exists.")
-      raise "Create index failed in an unexpected way: \n\n#{response.body}"
+    checkresponse = @client.send_http(HTTP::Get.new(@client.make_uri("/#{index_name}/select")), true, ['200', '404'])
+    if checkresponse.code.eql?('404')
+      uri = @client.make_uri('/admin/cores', [
+        ["action", "CREATE"],
+        ["name", index_name],
+        ["instanceDir", index_name],
+        ["configSet", config_set]
+      ])
+      response = @client.send_http(HTTP::Post.new(uri), true, ['200', '500'])
+      if response.code.eql?('500') && !response.body.include?("Core with name '#{index_name}' already exists.")
+        raise "Create index failed in an unexpected way: \n\n#{response.body}"
+      end
     end
   end
 
