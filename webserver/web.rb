@@ -1,6 +1,7 @@
 require 'sinatra'
 require 'sinatra/base'
 require 'sinatra/cross_origin'
+set :protection, :except => [:json_csrf] #we don't have a same-origin policy on this service and this breaks the get status request when running behind kubernetes nginx ingress
 # require 'httplog'
 
 require_relative '../generic-indexer/generic_indexer'
