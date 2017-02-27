@@ -11,8 +11,10 @@ enabling indexes on both the direct properties of records in a collection, as we
 key properties of directly related objects; for instance a keyword value from a keyword 
 collection, which was linked to a document from a document collection (like genre).
 
-
 == Usage
+
+NOTE: This README describes the libraries. See the webserver folder for a web-api on top of these libraries.
+
 Creating an index for a Timbuctoo collection is a 3-step process:
 
 1. <<scraping, Scrape Timbuctoo data>>

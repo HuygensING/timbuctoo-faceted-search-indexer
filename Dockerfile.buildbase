@@ -1,0 +1,15 @@
+FROM ruby:2.2
+
+RUN mkdir -p /app
+COPY webserver/Gemfile /app/webserver/Gemfile
+COPY webserver/run.sh /app/webserver/run.sh
+RUN cd /app/webserver && bundle install
+
+
+EXPOSE 80
+
+ENV TIMBUCTOO_SCRAPE_URL http://timbuctoo
+ENV SOLR_URL http://solr/solr
+
+WORKDIR /app
+CMD ["rerun", "--background", "/app/webserver/run.sh"]

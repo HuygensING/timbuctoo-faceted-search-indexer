@@ -16,13 +16,19 @@ services:
     ports:
       - "8081:8983"
   indexer:
-    image: huygensing/timbuctoo-faceted-search-indexer
-    build: .
+    image: huygensing/timbuctoo-faceted-search-indexer:buildbase
     environment:
       - TIMBUCTOO_SCRAPE_URL=http://timbuctoo
       - SOLR_URL=http://solr:8983/solr
     ports:
       - "8083:80"
+    volumes: 
+      - ./dcar:/app/dcar
+      - ./womenwriters:/app/womenwriters
+      - ./federated-indexer:/app/federated-indexer
+      - ./generic-indexer:/app/generic-indexer
+      - ./lib:/app/lib
+      - ./webserver:/app/webserver
   timbuctoo-gui:
     image: huygensing/timbuctoo-gui
     environment:

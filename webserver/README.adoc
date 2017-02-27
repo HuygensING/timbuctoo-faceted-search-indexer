@@ -1,0 +1,26 @@
+= indexer web API
+This folder contains a small sinatra web app that calls the methods in the scrape libraries.
+
+== build
+
+There should be an image called *huygensing/timbuctoo-faceted-search-indexer:buildbase* on dockerhub.
+This image contains everything needed to run the sinatra app.
+
+To regenerate this image you run `docker build -t huygensing/timbuctoo-faceted-search-indexer:buildbase -f Dockerfile.buildbase .` from the git root.
+
+To build a container with the runtime you run `docker build -t huygensing/timbuctoo-gui .` from the git root.
+This container will expose a webserver on port 80.
+You can set the environment variables listed in the Dockerfile to specify the urls that this app uses.
+
+== develop
+
+run `docker-compose up -d` to run all the services, including this indexer.
+This will also run a watcher process inside the timbuctoo-faceted-search-indexer container so that any changes you make in the files in this repo will be automatically rebuilt on the container.
+
+== Dependencies
+
+For a list of dependencies you should inspect the Dockerfile.buildbase and the Gemfile.lock.
+
+== Client app
+
+A javascript app that can trigger this indexer and read from the solr server is developed at https://github.com/HuygensING/timbuctoo-gui/tree/master/timbuctoo-generic-search-client
