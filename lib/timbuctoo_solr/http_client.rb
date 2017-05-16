@@ -1,5 +1,6 @@
 require 'net/http'
 include Net
+# require 'httplog'
 
 class ResponseError < StandardError
   attr_reader :response, :expected_responses, :body

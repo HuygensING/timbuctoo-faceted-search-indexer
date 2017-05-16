@@ -32,13 +32,14 @@ class WwPersonMapper < DefaultMapper
   def add_languages(document_mapper)
     @cache.each do |id, record|
       @cache[id]['language_ss'] = []
-
-      record['@workIds'].each do |work_id|
-        work = document_mapper.find(work_id)
-        if work.nil?
-          $stderr.puts "WARNING Problem with work #{work_id} created by author #{id} (wrong VRE?)"
-        else
-          @cache[id]['language_ss'].concat(work['language_ss'])
+      if record['@workIds'] != nil
+        record['@workIds'].each do |work_id|
+          work = document_mapper.find(work_id)
+          if work.nil?
+            $stderr.puts "WARNING Problem with work #{work_id} created by author #{id} (wrong VRE?)"
+          else
+            @cache[id]['language_ss'].concat(work['language_ss'])
+          end
         end
       end
       @cache[id]['language_ss'].uniq!
@@ -62,7 +63,9 @@ class WwPersonMapper < DefaultMapper
 
   private
   def add_location_sort(data)
-    data["locationSort_s"] = data["relatedLocations_ss"].sort.join(" ")
+    if data["relatedLocations_ss"] != nil
+      data["locationSort_s"] = data["relatedLocations_ss"].sort.join(" ")
+    end
   end
 
   def convert_temp_name(data)

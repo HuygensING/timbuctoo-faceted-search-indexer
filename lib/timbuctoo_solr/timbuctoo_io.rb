@@ -15,7 +15,7 @@ class Dataset
   private
   def fetch_metadata(metadata_url)
     uri = URI.new(metadata_url)
-    uri.query = URI.encode_www_form(["withCollectionInfo", "true"] + URI.decode_www_form(uri.query))
+    uri.query = URI.encode_www_form([["withCollectionInfo", "true"]] + URI.decode_www_form(uri.query))
     response = @client.send_http(HTTP::Get.new(uri), true, ['200'])
 
     JSON.parse(response.body, :symbolize_names => true)
@@ -83,7 +83,7 @@ class TimbuctooIO
     response = @client.send_http(Net::HTTP::Get.new(@client.make_uri("/v2.1/domain/#{collection_name}", [
       ["rows", batch_size],
       ["start", start_value]
-    ] + (with_relations ? ["withRelations", "true"] : []))), true, ['200'])
+    ] + (with_relations ? [["withRelations", "true"]] : []))), true, ['200'])
 
     response.body
   end

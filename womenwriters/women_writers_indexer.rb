@@ -49,21 +49,11 @@ class WomenWritersIndexer
       puts "Found #{@document_mapper.person_receptions.length} person receptions"
       puts "Found #{@document_mapper.document_receptions.length} document receptions"
 
-      @solr_io.update("wwcollectives", 0)
       reindex_collectives
-      @solr_io.update("wwcollectives", 1, true)
-      @solr_io.update("wwpersons", 0)
       reindex_persons
-      @solr_io.update("wwpersons", 1, true)
-      @solr_io.update("wwdocuments", 0)
       reindex_documents
-      @solr_io.update("wwdocuments", 1, true)
-      @solr_io.update("wwpersonreceptions", 0)
       reindex_person_receptions
-      @solr_io.update("wwpersonreceptions", 1, true)
-      @solr_io.update("wwdocumentreceptions", 0)
       reindex_document_receptions
-      @solr_io.update("wwdocumentreceptions", 1, true)
     ensure
       @import_status.finish_import(indexer_succeeded)
     end
@@ -150,10 +140,13 @@ class WomenWritersIndexer
     batch = []
     batch_size = 500
     @document_mapper.send(reception_entry).each do |reception|
-      batch << reception_mapper.convert(reception)
-      if batch.length >= batch_size
-        @solr_io.update(index_name, batch)
-        batch = []
+      converted = reception_mapper.convert(reception)
+      if converted != nil
+        batch << reception_mapper.convert(reception)
+        if batch.length >= batch_size
+          @solr_io.update(index_name, batch)
+          batch = []
+        end
       end
     end
     @solr_io.update(index_name, batch)

@@ -153,11 +153,11 @@ private
     else 
       doc = get_vre_status()
       #see if there was already a document for this vre
-      if doc && doc["updating"]
+      if doc && doc[:updating] && doc[:updating][0]
         raise ConcurrentSolrUpdateError, "Document is already being updated"
       end
       if doc
-        version = doc["_version_"]
+        version = doc[:_version_]
       else
         version = -1 #A version of -1 indicates to solr that we expect the document to be absent. It wil return 409 if the document exists
       end

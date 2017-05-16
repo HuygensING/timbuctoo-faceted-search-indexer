@@ -38,20 +38,22 @@ class WwDocumentMapper < DefaultMapper
       @cache[id]['authorName_ss'] = Array.new
       @cache[id]['authorNameSort_s'] = ''
 
-      record['@authorIds'].each do |author_id|
-        author = person_mapper.find(author_id)
-        if author.nil?
-          $stderr.puts "WARNING Problem finding wwperson #{author_id} which isCreatorOf #{id} (wrong VRE?)"
-        else
-          child_author = {}
-          author.each do |key, value|
-            child_author["person_#{key}"] = value unless key.eql?("id")
+      if record['@authorIds'] != nil
+        record['@authorIds'].each do |author_id|
+          author = person_mapper.find(author_id)
+          if author.nil?
+            $stderr.puts "WARNING Problem finding wwperson #{author_id} which isCreatorOf #{id} (wrong VRE?)"
+          else
+            child_author = {}
+            author.each do |key, value|
+              child_author["person_#{key}"] = value unless key.eql?("id")
+            end
+            child_author["id"] = "#{id}/#{author_id}"
+            @cache[id]['authorGender_ss'] << author['gender_s']
+            @cache[id]['authorName_ss'] << author['displayName_s']
+            name_sorts << author['nameSort_s']
+            @cache[id]['_childDocuments_'] << child_author
           end
-          child_author["id"] = "#{id}/#{author_id}"
-          @cache[id]['authorGender_ss'] << author['gender_s']
-          @cache[id]['authorName_ss'] << author['displayName_s']
-          name_sorts << author['nameSort_s']
-          @cache[id]['_childDocuments_'] << child_author
         end
       end
 
@@ -79,11 +81,15 @@ class WwDocumentMapper < DefaultMapper
 
   private
   def add_location_sort(data)
-    data["locationSort_s"] = data["publishLocation_ss"].sort.join(" ")
+    if data["publishLocation_ss"] != nil
+      data["locationSort_s"] = data["publishLocation_ss"].sort.join(" ")
+    end
   end
 
   def add_language_sort(data)
-    data["languageSort_s"] = data["language_ss"].sort.join(" ")
+    if data["language_ss"] != nil
+      data["languageSort_s"] = data["language_ss"].sort.join(" ")
+    end
   end
 
   def add_english_title(data)

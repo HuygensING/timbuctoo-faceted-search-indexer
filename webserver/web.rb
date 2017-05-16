@@ -30,6 +30,9 @@ post '/trigger' do
         return
       elsif payload["datasetName"] == "WomenWriters"
         WomenWritersIndexer.new(
+          # :dump_dir => '/app/webserver/cache',
+          # :dump_files => false,
+          # :from_file => payload["cache"] == "load",
           :timbuctoo_url => ENV['TIMBUCTOO_SCRAPE_URL'],
           :solr_url => ENV['SOLR_URL']
         ).run
