@@ -102,9 +102,9 @@ class ImportStatus
         result["updating"] = false
       end
       if doc[:ready]
-        result["updating"] = !!doc[:ready][0]
+        result["ready"] = !!doc[:ready][0]
       else
-        result["updating"] = false
+        result["ready"] = false
       end
     end
     result
