@@ -96,8 +96,16 @@ class ImportStatus
           result[outputkey][subkey] = value[0] if value
         end
       }
-      result["updating"] = !!doc[:updating]
-      result["ready"] = !!doc[:ready]
+      if doc[:updating]
+        result["updating"] = !!doc[:updating][0]
+      else
+        result["updating"] = false
+      end
+      if doc[:ready]
+        result["updating"] = !!doc[:ready][0]
+      else
+        result["updating"] = false
+      end
     end
     result
   end
