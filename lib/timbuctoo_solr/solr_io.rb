@@ -17,7 +17,7 @@ class SolrIO
       uri = @client.make_uri('/admin/cores', [
         ["action", "CREATE"],
         ["name", index_name],
-        ["instanceDir", index_name],
+        ["instanceDir", "mycores/" + index_name],
         ["configSet", config_set]
       ])
       response = @client.send_http(HTTP::Post.new(uri), true, ['200', '500'])
